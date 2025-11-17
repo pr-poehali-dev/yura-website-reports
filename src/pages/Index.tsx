@@ -308,10 +308,10 @@ const Index = () => {
                 </CardContent>
               </Card>
             ))}
+            </div>
           </div>
-        </div>
 
-        <div className="container mx-auto mt-20">
+          <div className="mt-20">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
@@ -388,6 +388,7 @@ const Index = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
           </div>
         </div>
       </section>
