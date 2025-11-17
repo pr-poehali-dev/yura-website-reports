@@ -21,6 +21,7 @@ interface Talk {
   date: string;
   description: string;
   slides: string[];
+  isMyTalk: boolean;
 }
 
 const mockTalks: Talk[] = [
@@ -37,7 +38,8 @@ const mockTalks: Talk[] = [
     views: 1234,
     date: '15 ноября 2024',
     description: 'Обзор последних достижений в применении машинного обучения для диагностики заболеваний',
-    slides: ['🧠', '🔬', '💡', '📊']
+    slides: ['🧠', '🔬', '💡', '📊'],
+    isMyTalk: false
   },
   {
     id: 2,
@@ -52,7 +54,8 @@ const mockTalks: Talk[] = [
     views: 892,
     date: '10 ноября 2024',
     description: 'Разбор реальных возможностей квантовых компьютеров и перспектив развития технологии',
-    slides: ['⚛️', '🔢', '🌌', '🚀']
+    slides: ['⚛️', '🔢', '🌌', '🚀'],
+    isMyTalk: true
   },
   {
     id: 3,
@@ -67,7 +70,8 @@ const mockTalks: Talk[] = [
     views: 2103,
     date: '5 ноября 2024',
     description: 'Практические методики применения дизайн-мышления для создания успешных продуктов',
-    slides: ['💭', '✏️', '🎨', '🎯']
+    slides: ['💭', '✏️', '🎨', '🎯'],
+    isMyTalk: false
   },
   {
     id: 4,
@@ -82,7 +86,8 @@ const mockTalks: Talk[] = [
     views: 756,
     date: '1 ноября 2024',
     description: 'Реальные примеры применения блокчейна в логистике, здравоохранении и госуслугах',
-    slides: ['🔗', '📦', '🏥', '🏛️']
+    slides: ['🔗', '📦', '🏥', '🏛️'],
+    isMyTalk: true
   },
   {
     id: 5,
@@ -97,7 +102,8 @@ const mockTalks: Talk[] = [
     views: 1567,
     date: '28 октября 2024',
     description: 'Научный подход к повышению личной эффективности и борьбе с прокрастинацией',
-    slides: ['🧘', '⏰', '📈', '✅']
+    slides: ['🧘', '⏰', '📈', '✅'],
+    isMyTalk: false
   },
   {
     id: 6,
@@ -112,7 +118,8 @@ const mockTalks: Talk[] = [
     views: 934,
     date: '20 октября 2024',
     description: 'Архитектура децентрализованных приложений и будущее интернета без посредников',
-    slides: ['🌐', '🔐', '💎', '🌟']
+    slides: ['🌐', '🔐', '💎', '🌟'],
+    isMyTalk: true
   }
 ];
 
@@ -124,7 +131,17 @@ const Index = () => {
   const [selectedTalk, setSelectedTalk] = useState<Talk | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const filteredTalks = mockTalks.filter(talk => {
+  const myTalks = mockTalks.filter(talk => talk.isMyTalk);
+  const communityTalks = mockTalks.filter(talk => !talk.isMyTalk);
+
+  const filteredMyTalks = myTalks.filter(talk => {
+    const matchesSearch = talk.title.toLowerCase().includes(search.toLowerCase()) ||
+                         talk.author.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = selectedCategory === 'Все' || talk.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredCommunityTalks = communityTalks.filter(talk => {
     const matchesSearch = talk.title.toLowerCase().includes(search.toLowerCase()) ||
                          talk.author.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === 'Все' || talk.category === selectedCategory;
@@ -202,22 +219,43 @@ const Index = () => {
 
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold">Популярные доклады</h3>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Icon name="Sparkles" size={20} />
-              <span>{filteredTalks.length} докладов</span>
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <Icon name="User" size={24} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-bold">Мои доклады</h3>
+                  <p className="text-muted-foreground">Ваши опубликованные презентации</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button className="bg-gradient-to-r from-primary to-secondary">
+                  <Icon name="Plus" size={20} className="mr-2" />
+                  Добавить доклад
+                </Button>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Icon name="FileText" size={20} />
+                  <span>{filteredMyTalks.length}</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTalks.map((talk, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredMyTalks.map((talk, index) => (
               <Card 
                 key={talk.id} 
-                className="group hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 cursor-pointer border-border hover:border-primary animate-fade-in overflow-hidden"
+                className="group hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300 cursor-pointer border-primary/50 hover:border-primary animate-fade-in overflow-hidden relative"
                 style={{ animationDelay: `${index * 0.1}s` }}
                 onClick={() => openTalk(talk)}
               >
+                <div className="absolute top-2 left-2 z-10">
+                  <Badge className="bg-primary/90 backdrop-blur-sm">
+                    <Icon name="Star" size={12} className="mr-1" />
+                    Мой
+                  </Badge>
+                </div>
                 <div className="h-48 bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 relative overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-50 group-hover:scale-110 transition-transform">
                     {talk.slides[0]}
@@ -241,6 +279,86 @@ const Index = () => {
                     <div className="flex items-center gap-2">
                       <Avatar className="w-10 h-10">
                         <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white">
+                          {talk.author.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{talk.author.name}</p>
+                        <p className="text-xs text-muted-foreground">{talk.author.role}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Icon name="Clock" size={16} />
+                        <span>{talk.duration}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Icon name="Eye" size={16} />
+                        <span>{talk.views}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Icon name="Calendar" size={16} />
+                      <span>{talk.date}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <div className="container mx-auto mt-20">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
+                <Icon name="Users" size={24} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-3xl font-bold">Доклады сообщества</h3>
+                <p className="text-muted-foreground">Популярные презентации от других авторов</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Icon name="Sparkles" size={20} />
+              <span>{filteredCommunityTalks.length}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCommunityTalks.map((talk, index) => (
+              <Card 
+                key={talk.id} 
+                className="group hover:shadow-2xl hover:shadow-secondary/20 transition-all duration-300 cursor-pointer border-border hover:border-secondary animate-fade-in overflow-hidden"
+                style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => openTalk(talk)}
+              >
+                <div className="h-48 bg-gradient-to-br from-secondary/20 via-accent/20 to-primary/20 relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-50 group-hover:scale-110 transition-transform">
+                    {talk.slides[0]}
+                  </div>
+                  <Badge className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm">
+                    {talk.category}
+                  </Badge>
+                </div>
+
+                <CardHeader>
+                  <CardTitle className="group-hover:text-secondary transition-colors line-clamp-2">
+                    {talk.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {talk.description}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="bg-gradient-to-br from-secondary to-accent text-white">
                           {talk.author.avatar}
                         </AvatarFallback>
                       </Avatar>
